@@ -15,6 +15,13 @@ from __future__ import division
 from __future__ import print_function
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import socket
+
+
+def get_local_ip():
+	hostname = socket.gethostname()
+	local_ip = socket.gethostbyname(hostname)
+	return local_ip
 
 class WebServer(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -24,7 +31,7 @@ class WebServer(BaseHTTPRequestHandler):
 		self.wfile.write(bytes("<html><body>Hola Mundo!!!</body></html>", "utf-8"))
 
 def main():
-	webServer = HTTPServer(("192.168.3.51", 8000), WebServer)
+	webServer = HTTPServer((get_local_ip(), 8080), WebServer)
 	print("Servidor iniciado")
 	print ("\tAtendiendo solicitudes entrantes")
 	try:

@@ -18,14 +18,19 @@ import os
 import sys
 import json
 import magic
-from led_manager import leds, bcd, marquee
+from greenhouse_controller import switch, temperature_pid, graph, radiator, ventilator
 from http.server import BaseHTTPRequestHandler, HTTPServer
-# import time
-# import time
+import socket# import time
+
+def get_local_ip():
+	hostname = socket.gethostname()
+	local_ip = socket.gethostbyname(hostname)
+	return local_ip
+
 
 # Nombre o dirección IP del sistema anfitrión del servidor web
 # address = "localhost"
-address = "192.168.3.40"
+address = get_local_ip()
 # Puerto en el cual el servidor estará atendiendo solicitudes HTTP
 # El default de un servidor web en produción debe ser 80
 port = 8080
@@ -63,9 +68,11 @@ class WebServer(BaseHTTPRequestHandler):
 		if not 'action' in json_obj or not 'value' in json_obj:
 			return
 		switcher = {
-			'led'     : leds,
-			'marquee' : marquee,
-			'numpad'  : bcd
+			'switch'     : switch,
+			'temperature' : temperature_pid,
+			'graph'  : graph,
+			'radiatior' : radiator,
+			'ventilator' : ventilator
 		}
 		func = switcher.get(json_obj['action'], None)
 		if func:
