@@ -18,7 +18,7 @@ import os
 import sys
 import json
 import magic
-from greenhouse_controller import switch, temperature_pid, graph, radiator, ventilator
+from led_manager import *
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import socket# import time
 
@@ -52,7 +52,7 @@ class WebServer(BaseHTTPRequestHandler):
 
 	"""Sirve el archivo de interfaz de usuario"""
 	def _serve_ui_file(self):
-		if not os.path.isfile("user_interface.html"):
+		if not os.path.isfile("index.html"):
 			err = "user_interface.html not found."
 			self.wfile.write(bytes(err, "utf-8"))
 			print(err)
@@ -61,23 +61,23 @@ class WebServer(BaseHTTPRequestHandler):
 			with open("index.html", "r") as f:
 				content = "\n".join(f.readlines())
 		except:
-			content = "Error reading user_interface.html"
+			content = "Error reading index.html"
 		self.wfile.write(bytes(content, "utf-8"))
 
 	def _parse_post(self, json_obj):
 		if not 'action' in json_obj or not 'value' in json_obj:
 			return
 		switcher = {
-			'switch'     : switch,
-			'temperature' : temperature_pid,
-			'graph'  : graph,
-			'radiatior' : radiator,
-			'ventilator' : ventilator
+			'current_temp'     : get_greenhouse_temp,
+			'greenhouse_temperature': set_greenhouse_temperature,
+			'radiator_power': set_radiator_power,
+			'ventilator_power': set_ventilator_power
 		}
 		func = switcher.get(json_obj['action'], None)
 		if func:
 			print('\tCall{}({})'.format(func, json_obj['value']))
-			func(json_obj['value'])
+			return func(json_obj['value'])
+		return None
 
 
 	"""do_GET controla todas las solicitudes recibidas vía GET, es
@@ -104,24 +104,35 @@ class WebServer(BaseHTTPRequestHandler):
 
 
 
+	def _set_headers(self):
+		self.send_response(200)
+		self.send_header('Content-type', 'application/json')
+		self.end_headers()
+
 	"""do_POST controla todas las solicitudes recibidas vía POST, es
 	decir, envíos de formulario. Aquí se gestionan los comandos para
 	la Raspberry Pi"""
 	def do_POST(self):
-		# Primero se obtiene la longitud de la cadena de datos recibida
-		content_length = int(self.headers.get('Content-Length'))
-		if content_length < 1:
-			return
-		# Después se lee toda la cadena de datos
-		post_data = self.rfile.read(content_length)
-		# Finalmente, se decodifica el objeto JSON y se procesan los datos.
-		# Se descartan cadenas de datos mal formados
-		try:
-			jobj = json.loads(post_data.decode("utf-8"))
-			self._parse_post(jobj)
-		except:
-			print(sys.exc_info())
-			print("Datos POST no recnocidos")
+		if self.path == '/':
+			# Primero se obtiene la longitud de la cadena de datos recibida
+			content_length = int(self.headers.get('Content-Length'))
+			if content_length < 1:
+				return
+			# Después se lee toda la cadena de datos
+			post_data = self.rfile.read(content_length)
+			# Finalmente, se decodifica el objeto JSON y se procesan los datos.
+			# Se descartan cadenas de datos mal formados
+			try:
+				jobj = json.loads(post_data.decode("utf-8"))
+				response = self._parse_post(jobj)
+				self._set_headers()
+				if response:
+					self.wfile.write(str.encode(response))
+			except:
+				self.send_response(400)
+				self.send_header('Content-type', 'application/json')
+				self.end_headers()
+				self.wfile.write(str.encode('{"message":"Bad request"}'))
 
 def main():
 	# Inicializa una nueva instancia de HTTPServer con el

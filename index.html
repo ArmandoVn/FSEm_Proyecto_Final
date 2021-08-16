@@ -21,10 +21,12 @@
         #myChart {
             max-height: 450px !important;
         }
+
         .space-b-row .card {
             margin: 2% !important;
         }
-        .main-card h5{
+
+        .main-card h5 {
             font-weight: 400;
             font-size: 18px;
         }
@@ -75,7 +77,8 @@
                         <form onsubmit="return update_value('#temp_input', 'greenhouse_temperature')">
                             <div class="form-group">
                                 <label for="temp_input">Temperatura del invernadero:</label>
-                                <input type="range" class="form-control-range" min="10" max="30" id="temp_input" oninput="change_value(this, '#new_temp')">
+                                <input type="range" class="form-control-range" min="10" max="30" id="temp_input"
+                                    oninput="change_value(this, '#new_temp')">
                                 <small class="form-text text-muted">Minima: 15°C, Maxima: 30°C</small>
                             </div>
                             <p class="card-text">Temperatura seleccionada: <b id="new_temp"></b>°C</p>
@@ -93,7 +96,8 @@
                         <form onsubmit="return update_value('#power_input', 'radiator_power')">
                             <div class="form-group">
                                 <label for="power_input">Potencia del radiador:</label>
-                                <input type="range" class="form-control-range" min="1000" max="2000" id="power_input" oninput="change_value(this, '#new_power')">
+                                <input type="range" class="form-control-range" min="1000" max="2000" id="power_input"
+                                    oninput="change_value(this, '#new_power')">
                                 <small class="form-text text-muted">Minima: 1000W, Maxima: 2000W</small>
                             </div>
                             <p class="card-text">Potencia seleccionada: <b id="new_power"></b>W</p>
@@ -143,7 +147,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Control de potencia del ventilador -->
             <div class="col-md-6 col-sm-12">
                 <div class="card">
@@ -154,7 +158,8 @@
                         <form onsubmit="return update_value('#power_ventilator_input', 'ventilator_power')">
                             <div class="form-group">
                                 <label for="power_ventilator_input">Potencia del ventilador:</label>
-                                <input type="range" class="form-control-range" min="1000" max="2000" id="power_ventilator_input" oninput="change_value(this, '#power_ventilator')">
+                                <input type="range" class="form-control-range" min="1000" max="2000"
+                                    id="power_ventilator_input" oninput="change_value(this, '#power_ventilator')">
                                 <small class="form-text text-muted">Minima: 1000W, Maxima: 2000W</small>
                             </div>
                             <p class="card-text">Potencia seleccionada: <b id="power_ventilator"></b>W</p>
@@ -177,12 +182,11 @@
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.min.js"></script>
     <script>
-        var greenhouse_temperature = window.localStorage.getItem('greenhouse_temperature') == null ? $('#temp_input').attr('min') : window.localStorage.getItem('greenhouse_temperature');
-        var radiator_power = window.localStorage.getItem('radiator_power') == null ? $('#power_input').attr('min') : window.localStorage.getItem('radiator_power');
-        var ventilator_power = window.localStorage.getItem('ventilator_power') == null ? $('#power_ventilator_input').attr('min') : window.localStorage.getItem('ventilator_power');
+        var greenhouse_temperature = localStorage.getItem('greenhouse_temperature') == null ? $('#temp_input').attr('min') : localStorage.getItem('greenhouse_temperature');
+        var radiator_power = localStorage.getItem('radiator_power') == null ? $('#power_input').attr('min') : localStorage.getItem('radiator_power');
+        var ventilator_power = localStorage.getItem('ventilator_power') == null ? $('#power_ventilator_input').attr('min') : localStorage.getItem('ventilator_power');
 
         /* Valores actuales de cada componente */
-        $('#greenhouse_temperature').html(greenhouse_temperature);
         $('#radiator_power').html(radiator_power);
         $('#ventilator_power').html(ventilator_power);
 
@@ -196,51 +200,119 @@
         $('#new_power').html($('#power_input').val());
         $('#power_ventilator').html($('#power_ventilator_input').val());
 
-        function change_value(input, id_child){
+        function change_value(input, id_child) {
             $(id_child).html(input.value);
         }
 
-        function update_value(input, storage_id){
-            window.localStorage.setItem(storage_id, $(input).val());
-            window.location.reload();
+        function update_value(input, storage_id) {
+            localStorage.setItem(storage_id, $(input).val());
+            location.reload();
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", location.href, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function (aEvt) {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        let new_temp = JSON.parse(xhr.response);
+                        console.log(new_temp);
+                    }
+                    else
+                        console.log("Error loading page\n");
+                }
+            };
+            xhr.send(JSON.stringify({
+                'action': storage_id,
+                'value': $(input).val(),
+            }));
             return false;
         }
 
-        var ctx = document.getElementById('myChart');
-        var myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'],
-                datasets: [{
-                    label: 'Registro de temperatura e irrigación',
-                    data: [12, 19, 3, 5, 2, 3],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+        var labels = []
+        var data_chart = []
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", location.href, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function (aEvt) {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    let new_temp = JSON.parse(xhr.response);
+                    add_hist_temp(new_temp);
+                    draw_chart(labels, data_chart);
+                }
+                else
+                    console.log("Error loading page\n");
+            }
+        };
+        xhr.send(JSON.stringify({
+            'action': 'current_temp',
+            'value': null,
+        }));
+
+        function add_hist_temp(new_temp) {
+            let temps = localStorage.getItem('hist_temps') == null ? '{}' : localStorage.getItem('hist_temps');
+            temps = JSON.parse(temps)
+            for (key in new_temp) {
+                temps[key] = new_temp[key];
+                $('#greenhouse_temperature').html(new_temp[key]);
+            }
+            if (Object.keys(temps).length > 8){
+                temps = reduce_json(temps);
+            }
+            for (key in temps) {
+                labels.push(key)
+                data_chart.push(temps[key])
+            }
+            localStorage.setItem("hist_temps", JSON.stringify(temps))
+        }
+
+        function reduce_json(json){
+            keys = []
+            new_json = {}
+            for(k in json) keys.push(k)
+            for (let index = 1; index < keys.length; index++) {
+                const key = keys[index];
+                new_json[key] = json[key]
+            }
+            return new_json
+        }
+
+        function draw_chart(labels, data_chart) {
+            var ctx = document.getElementById('myChart');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Registro de temperatura',
+                        data: data_chart,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     </script>
 </body>
 
