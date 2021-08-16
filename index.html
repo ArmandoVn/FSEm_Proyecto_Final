@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Controller</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.3.0/mdb.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <style>
+        #myChart {
+            max-height: 450px !important;
+        }
+        .space-b-row .card {
+            margin: 2% !important;
+        }
+        .main-card h5{
+            font-weight: 400;
+            font-size: 18px;
+        }
+    </style>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Control de Invernadero</a>
+            <button class="navbar-toggler" type="submit" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link active" href="#">Actividad <span class="sr-only">(current)</span></a>
+                    <a class="nav-item nav-link" href="#">Sistema de irrigación</a>
+                    <a class="nav-item nav-link" href="#temp_input">Control de temparatura</a>
+                    <a class="nav-item nav-link" href="#power_input">Radiador</a>
+                    <a class="nav-item nav-link" href="#power_ventilator_input">Ventilador</a>
+                    <a class="nav-item nav-link" href="#">Programación</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid">
+        <div class="row space-b-row">
+            <!-- Grafíca de actividad -->
+            <div class="col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Estado del invernadero</h2>
+                    </div>
+                    <div class="card-body main-card">
+                        <h5 class="card-text">Temperatura actual: <b id="greenhouse_temperature">30</b>°C</h5>
+                        <h5 class="card-text">Potencia actual del radiador: <b id="radiator_power">1500</b>W</h5>
+                        <h5 class="card-text">Potencia actual del ventilador: <b id="ventilator_power">1500</b>W</h5>
+                        <canvas id="myChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control de temperatura del invernadero -->
+            <div class="col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Control de temperatura del invernadero</h2>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="return update_value('#temp_input', 'greenhouse_temperature')">
+                            <div class="form-group">
+                                <label for="temp_input">Temperatura del invernadero:</label>
+                                <input type="range" class="form-control-range" min="10" max="30" id="temp_input" oninput="change_value(this, '#new_temp')">
+                                <small class="form-text text-muted">Minima: 15°C, Maxima: 30°C</small>
+                            </div>
+                            <p class="card-text">Temperatura seleccionada: <b id="new_temp"></b>°C</p>
+                            <button type="submit" class="btn btn-primary">Ajustar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Control de potencia del radiador -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Control de potencia del radiador</h2>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="return update_value('#power_input', 'radiator_power')">
+                            <div class="form-group">
+                                <label for="power_input">Potencia del radiador:</label>
+                                <input type="range" class="form-control-range" min="1000" max="2000" id="power_input" oninput="change_value(this, '#new_power')">
+                                <small class="form-text text-muted">Minima: 1000W, Maxima: 2000W</small>
+                            </div>
+                            <p class="card-text">Potencia seleccionada: <b id="new_power"></b>W</p>
+                            <button type="submit" class="btn btn-primary">Ajustar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row space-b-row">
+            <!-- Programado de ciclos de temperatura e irrigado -->
+            <div class="col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Programación</h2>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Ciclo de temperatura:</h5>
+                        <form onsubmit="update_value(this)">
+                            <div class="form-group">
+                                <label for="meeting-time">Inicio:</label>
+                                <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
+                                    value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
+                            </div>
+                            <div class="form-group">
+                                <label for="meeting-time">Fin:</label>
+                                <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
+                                    value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Ajustar</button>
+                        </form>
+                        <br>
+                        <h5 class="card-title">Ciclo de irrigación:</h5>
+                        <form onsubmit="update_value(this)">
+                            <div class="form-group">
+                                <label for="meeting-time">Inicio:</label>
+                                <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
+                                    value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
+                            </div>
+                            <div class="form-group">
+                                <label for="meeting-time">Fin:</label>
+                                <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
+                                    value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Ajustar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control de potencia del ventilador -->
+            <div class="col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Control de potencia del ventilador</h2>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="return update_value('#power_ventilator_input', 'ventilator_power')">
+                            <div class="form-group">
+                                <label for="power_ventilator_input">Potencia del ventilador:</label>
+                                <input type="range" class="form-control-range" min="1000" max="2000" id="power_ventilator_input" oninput="change_value(this, '#power_ventilator')">
+                                <small class="form-text text-muted">Minima: 1000W, Maxima: 2000W</small>
+                            </div>
+                            <p class="card-text">Potencia seleccionada: <b id="power_ventilator"></b>W</p>
+                            <button type="submit" class="btn btn-primary">Ajustar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.min.js"></script>
+    <script>
+        var greenhouse_temperature = window.localStorage.getItem('greenhouse_temperature') == null ? $('#temp_input').attr('min') : window.localStorage.getItem('greenhouse_temperature');
+        var radiator_power = window.localStorage.getItem('radiator_power') == null ? $('#power_input').attr('min') : window.localStorage.getItem('radiator_power');
+        var ventilator_power = window.localStorage.getItem('ventilator_power') == null ? $('#power_ventilator_input').attr('min') : window.localStorage.getItem('ventilator_power');
+
+        /* Valores actuales de cada componente */
+        $('#greenhouse_temperature').html(greenhouse_temperature);
+        $('#radiator_power').html(radiator_power);
+        $('#ventilator_power').html(ventilator_power);
+
+        /* Valores input seleccionados */
+        $('#temp_input').val(greenhouse_temperature);
+        $('#power_input').val(radiator_power);
+        $('#power_ventilator_input').val(ventilator_power);
+
+        /* Valores dinamicos seleccionados */
+        $('#new_temp').html($('#temp_input').val());
+        $('#new_power').html($('#power_input').val());
+        $('#power_ventilator').html($('#power_ventilator_input').val());
+
+        function change_value(input, id_child){
+            $(id_child).html(input.value);
+        }
+
+        function update_value(input, storage_id){
+            window.localStorage.setItem(storage_id, $(input).val());
+            window.location.reload();
+            return false;
+        }
+
+        var ctx = document.getElementById('myChart');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'],
+                datasets: [{
+                    label: 'Registro de temperatura e irrigación',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
