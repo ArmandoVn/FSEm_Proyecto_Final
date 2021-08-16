@@ -183,6 +183,15 @@ function submit(action, value){
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", window.location.href, true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.onreadystatechange = function (aEvt) {
+		if (xhr.readyState == 4) {
+			console.log(xhr);
+			if(xhr.status == 200)
+			console.log(JSON.parse(xhr.response));
+			else
+			console.log("Error loading page\n");
+		}
+	};
 	xhr.send(JSON.stringify({
 		'action' : action,
 		'value' :  value,
