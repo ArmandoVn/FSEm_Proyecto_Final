@@ -39,6 +39,7 @@ def bcd(num):
 def set_ventilator_power(value):
 	""" Ajusta la potencia del ventilador """
 	print('Ajustando potencia del ventilador...')
+	bcd7(7)
 	run_marquee_left()
 	run_marquee_right()
 	print('Potencia ajustada a: {}'.format(value))

@@ -116,10 +116,11 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Ciclo de temperatura:</h5>
+                        <p class="form-text text-muted">Fecha y hora en que la temperatura se ajustara a 20°C.</p>
                         <form onsubmit="update_value(this)">
                             <div class="form-group">
                                 <label for="meeting-time">Inicio:</label>
-                                <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
+                                <input type="datetime-local" id="meeting-time-2" class="form-control" name="meeting-time"
                                     value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
                             </div>
                             <div class="form-group">
@@ -127,29 +128,30 @@
                                 <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
                                     value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
                             </div>
-                            <button type="submit" class="btn btn-primary">Ajustar</button>
+                            <button type="submit" class="btn btn-primary">Programar</button>
                         </form>
                         <br>
                         <h5 class="card-title">Ciclo de irrigación:</h5>
+                        <p class="form-text text-muted">Fecha y hora en que el sistema de irrigación se encedera y apagara.</p>
                         <form onsubmit="update_value(this)">
                             <div class="form-group">
                                 <label for="meeting-time">Inicio:</label>
-                                <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
+                                <input type="datetime-local" id="meeting-time-3" class="form-control" name="meeting-time"
                                     value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
                             </div>
                             <div class="form-group">
                                 <label for="meeting-time">Fin:</label>
-                                <input type="datetime-local" id="meeting-time" class="form-control" name="meeting-time"
+                                <input type="datetime-local" id="meeting-time-4" class="form-control" name="meeting-time"
                                     value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
                             </div>
-                            <button type="submit" class="btn btn-primary">Ajustar</button>
+                            <button type="submit" class="btn btn-primary">Programar</button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Control de potencia del ventilador -->
             <div class="col-md-6 col-sm-12">
+                <!-- Control de potencia del ventilador -->
                 <div class="card">
                     <div class="card-header">
                         <h2>Control de potencia del ventilador</h2>
@@ -165,6 +167,22 @@
                             <p class="card-text">Potencia seleccionada: <b id="power_ventilator"></b>W</p>
                             <button type="submit" class="btn btn-primary">Ajustar</button>
                         </form>
+                    </div>
+                </div>
+
+                <!-- Encendido y apagado del sistema de irrigación -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Control del sistema de irrigación</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text form-control is-valid text-center" id="irrigation_active">Sistema encendido</p>
+                        <p class="card-text form-control is-invalid text-center d-none" id="irrigation_inactive">Sistema apagado</p>
+                        <div class="custom-control custom-switch text-center">
+                            <input type="checkbox" class="custom-control-input" id="irrigation_swtich" onchange="on_off_irrigation(this)">
+                            <label class="custom-control-label" for="irrigation_swtich">Encender o apagar el sistema</label>
+                        </div>
+                        <br>
                     </div>
                 </div>
             </div>
@@ -185,8 +203,18 @@
         var greenhouse_temperature = localStorage.getItem('greenhouse_temperature') == null ? $('#temp_input').attr('min') : localStorage.getItem('greenhouse_temperature');
         var radiator_power = localStorage.getItem('radiator_power') == null ? $('#power_input').attr('min') : localStorage.getItem('radiator_power');
         var ventilator_power = localStorage.getItem('ventilator_power') == null ? $('#power_ventilator_input').attr('min') : localStorage.getItem('ventilator_power');
+        var irrigation_status = localStorage.getItem('irrigation_status') == null ? false : localStorage.getItem('irrigation_status');
 
         /* Valores actuales de cada componente */
+        if(irrigation_status && irrigation_status == 'on'){
+            $('#irrigation_swtich').prop('checked', true);
+            $('#irrigation_inactive').addClass('d-none');
+            $('#irrigation_active').removeClass('d-none');
+        }else{
+            $('#irrigation_swtich').prop('checked', false);
+            $('#irrigation_inactive').removeClass('d-none');
+            $('#irrigation_active').addClass('d-none');
+        }
         $('#radiator_power').html(radiator_power);
         $('#ventilator_power').html(ventilator_power);
 
@@ -202,6 +230,18 @@
 
         function change_value(input, id_child) {
             $(id_child).html(input.value);
+        }
+
+        function on_off_irrigation(input){
+            if(input.checked){
+                localStorage.setItem("irrigation_status", "on");
+                $('#irrigation_inactive').addClass('d-none');
+                $('#irrigation_active').removeClass('d-none');
+            }else{
+                localStorage.setItem("irrigation_status", "off");
+                $('#irrigation_inactive').removeClass('d-none');
+                $('#irrigation_active').addClass('d-none');
+            }
         }
 
         function update_value(input, storage_id) {
