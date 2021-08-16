@@ -58,7 +58,7 @@ class WebServer(BaseHTTPRequestHandler):
 			print(err)
 			return
 		try:
-			with open("user_interface.html", "r") as f:
+			with open("index.html", "r") as f:
 				content = "\n".join(f.readlines())
 		except:
 			content = "Error reading user_interface.html"
