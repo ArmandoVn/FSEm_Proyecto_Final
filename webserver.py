@@ -68,11 +68,13 @@ class WebServer(BaseHTTPRequestHandler):
 		if not 'action' in json_obj or not 'value' in json_obj:
 			return
 		switcher = {
-			'current_temp'     : get_greenhouse_temp,
+			'current_temp'     : get_temperature_response,
 			'greenhouse_temperature': set_greenhouse_temperature,
 			'radiator_power': set_radiator_power,
-			'ventilator_power': set_ventilator_power
+			'ventilator_power': set_ventilator_power,
+			'irrigation_status': change_irrigation_status
 		}
+		print(json_obj['action'])
 		func = switcher.get(json_obj['action'], None)
 		if func:
 			print('\tCall{}({})'.format(func, json_obj['value']))

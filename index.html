@@ -41,7 +41,7 @@
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
                     <a class="nav-item nav-link active" href="#">Actividad <span class="sr-only">(current)</span></a>
-                    <a class="nav-item nav-link" href="#">Sistema de irrigación</a>
+                    <a class="nav-item nav-link" href="#irrigation_swtich">Sistema de irrigación</a>
                     <a class="nav-item nav-link" href="#temp_input">Control de temparatura</a>
                     <a class="nav-item nav-link" href="#power_input">Radiador</a>
                     <a class="nav-item nav-link" href="#power_ventilator_input">Ventilador</a>
@@ -237,16 +237,16 @@
                 localStorage.setItem("irrigation_status", "on");
                 $('#irrigation_inactive').addClass('d-none');
                 $('#irrigation_active').removeClass('d-none');
+                make_request_api('irrigation_status','on')
             }else{
                 localStorage.setItem("irrigation_status", "off");
                 $('#irrigation_inactive').removeClass('d-none');
                 $('#irrigation_active').addClass('d-none');
+                make_request_api('irrigation_status','off')
             }
         }
 
-        function update_value(input, storage_id) {
-            localStorage.setItem(storage_id, $(input).val());
-            location.reload();
+        function make_request_api(action, value){
             var xhr = new XMLHttpRequest();
             xhr.open("POST", location.href, true);
             xhr.setRequestHeader('Content-Type', 'application/json');
@@ -261,9 +261,15 @@
                 }
             };
             xhr.send(JSON.stringify({
-                'action': storage_id,
-                'value': $(input).val(),
+                'action': action,
+                'value': value,
             }));
+        }
+
+        function update_value(input, storage_id) {
+            localStorage.setItem(storage_id, $(input).val());
+            location.reload();
+            make_request_api(storage_id, $(input).val())
             return false;
         }
 

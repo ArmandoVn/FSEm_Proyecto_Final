@@ -16,7 +16,7 @@ from __future__ import print_function
 import json
 
 # Simulator functions
-from blink import run_blink
+from blink import *
 from marquee import run_marquee_left, run_marquee_right
 from bcd import bcd7
 from random import random
@@ -24,12 +24,6 @@ import json
 from datetime import datetime
 
 last_error = random()
-
-""" Enciende el leds especificados en num, apagando los demás
-	(To be developed by the student)
-"""
-def leds(num):
-	run_blink(num)
 
 """	Despliega en número proporcionado en el display de siete segmentos.
 	(To be developed by the student)
@@ -77,7 +71,7 @@ def set_radiator_power(targeted_radiator_power):
 	print('Ajustando potencia del radiador...')
 	run_marquee_left()
 	run_marquee_right()
-	print('Potencia ajustada a: {}'.format(value))
+	print('Potencia ajustada a: {}'.format(targeted_radiator_power))
 	response = {}
 	return json.dumps(response)
 
@@ -97,6 +91,13 @@ def set_greenhouse_temperature(target_temperature):
 	response = {}
 	return json.dumps(response)
 
+def change_irrigation_status(value):
+	if value == 'on':
+		print('Sistema de irrigación encendido.')
+		bcd7(1)
+	else:
+		print('Sistema de irrigación apagado.')
+		bcd7(0)
 
 def get_temperature_response(_=None):
 	response = {}

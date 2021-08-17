@@ -39,3 +39,10 @@ def run_blink(num):
 	GPIO.output(LEDS[num - 1], GPIO.HIGH) # Turn led on
 	sleep(0.3)                 # Espera 500ms
 	GPIO.output(LEDS[num - 1], GPIO.LOW)  # Turn led off
+
+def on_blink():
+	# Blink the led
+	GPIO.output(LEDS[7], GPIO.HIGH) # Turn led on
+
+def off_blink():
+	GPIO.output(LEDS[7], GPIO.LOW)  # Turn led off
